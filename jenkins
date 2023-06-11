@@ -1,9 +1,9 @@
 //scripted
 node(""){
-def MHD = tool name: "maven3.8.6"
+def MHD = tool name: "maven3.8.8"
 stage('GitClone'){
 sh "echo this is git clone"
-git credentialsId: 'Github-Cred', url: 'https://github.com/jomacs-it/web-app.git'
+git credentialsId: 'Github-Cred', url: 'https://github.com/Jadebat79/web-app.git'
 }
 stage('Build'){
 sh "echo start of build process"
@@ -19,7 +19,7 @@ sh "${MHD}/bin/mvn deploy"
 }
 stage('DeploytoStaging'){
 sh "echo Deploy to Tomcat server"
-deploy adapters: [tomcat9(credentialsId: 'Tomcat-cred', path: '', url: 'http://54.196.234.205:7000/')], contextPath: null, war: 'target/*war'
+deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://3.93.200.153:9090/')], contextPath: null, war: 'target/*war'
 }
 stage('Approval'){
 sh "echo approval for Jenkins-file-app"
@@ -29,6 +29,6 @@ input message:'Approval for Prod'
 }
 stage('DeploytoProd'){
 sh "echo Deploy to Tomcat server"
-deploy adapters: [tomcat9(credentialsId: 'Tomcat-cred', path: '', url: 'http://54.196.234.205:7000/')], contextPath: null, war: 'target/*war'
+deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://3.93.200.153:9090/')], contextPath: null, war: 'target/*war'
 }
 }
