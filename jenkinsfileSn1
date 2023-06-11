@@ -1,0 +1,55 @@
+pipeline{
+  agent { label "Node1" }
+  tools{
+    maven "maven3.8.8"
+  }
+  stages{
+    stage("1. Cloning Code from Repo"){
+      steps{
+        git branch: 'main', url: 'https://github.com/Jadebat79/web-app.git'
+      }
+    }
+    stage("2. Build from Maven"){
+      steps{
+        sh "echo buldiing package"     
+        sh "mvn clean package"
+      }
+    }
+    stage("3. Code Quality Check"){
+      steps{
+        sh "echo Code quality check"
+        sh "mvn sonar:sonar"
+      }
+    }
+    stage("4. Storing of Artifacts"){
+      steps{
+        sh "echo storing artifacts in nexus"
+        sh "mvn deploy"
+      }
+    }
+    stage("5. Deploy to UAT env."){
+      steps{
+        sh "echo Deploy to user acceptance testing"
+        deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://3.93.200.153:9090/')], contextPath: null, war: 'target/*.war'
+      }
+    }
+    stage("6. Approvalby PM"){
+      steps{
+        timeout(time:5, unit:'DAYS'){
+        input message: 'Approval for Production'
+      }
+    }
+  }
+    stage("7. Deploy to Prod Env"){
+      steps{
+         sh "echo Deploy to Production Environment"
+        deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://3.93.200.153:9090/')], contextPath: null, war: 'target/*.war'
+      }
+    }
+    stage("8.Email Notification"){
+      steps{
+        emailext body: 'This is Build Success', subject: 'Build Success', to: 'jaynaj79@gmail.com'
+      }
+    }
+  }
+}
