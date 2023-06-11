@@ -1,39 +1,63 @@
-//scripted pipeline
-node{
- def MHD = tool name: "maven3.8.4"
-    stage('1.Initiation'){
-    sh "echo Start of td deployment"
-    }
-    stage('2.CloneCode'){
-    git branch: 'stage', credentialsId: 'GitHubCredentials', url: 'https://github.com/team16flight/web-app.git'
-    }
-    stage('3.buildMaven'){
-    sh "${MHD}/bin/mvn package"
-    }
-    stage('4.CodeQuality'){
-    //sh "${MHD}/bin/mvn sonar:sonar"
-    }
-    stage('5.UploadArtifacts'){
-    //sh "${MHD}/bin/mvn deploy"
-    }
-    stage('6.Deploy2Stage'){
-    sshagent(['32d5fb4f-d92f-4a10-9f12-2738eab55fcc']) {
-    sh "scp -o StrictHostKeyChecking=no target/*war ec2-user@172.31.15.31:/opt/tomcat9/webapps/app"
+//Scripted Groovy
+
+node(""){
+ 
+ def MHD = tool name: "maven3.8.8"
+ def jomacs = "${MHD}/bin/mvn"
+  
+  stage("1. Git clone from repo"){
+     sh "echo start of git clone"
+     git branch: 'main', url: 'https://github.com/Jadebat79/web-app.git'
+     sh "echo end of git clone"
+   }
+   
+   stage("2. Build from Maven"){
+       sh "echo start building from maven"
+       sh "${jomacs} clean package"
+       sh "echo end of building from maven"
+   }
+   
+   stage("3. Code Quality Scan"){
+       sh "echo start code scan"
+       sh "${jomacs} sonar:sonar"
+       sh "echo end of code scan"
+   }
+   stage("4. Slack Notification to Developers"){
+       sh "echo send notification to Developers"
+       slackSend channel: '#general', message: 'Successful scan of Built Artifacts'
+   }
+ 
+   stage("5. Store the Artifact to Nexus"){
+       sh "echo start uploading artifact to Nexus"
+       sh "${jomacs} deploy"
+       sh "echo end of upload to Nexus"
+   }
+   
+   stage("6. Deploy to Tomcat in UAT"){
+       sh "echo start deploying to Tomcat server in UAT"
+       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://34.207.243.183:9090')], contextPath: null, war: 'target/*.war'
+       sh "echo end of deploy to Tomcat server in UAT"
+   }
+   
+   stage("7. Approval by PM"){
+      sh " echo Approval required from PM"
+      timeout(time:3, unit:'DAYS'){
+         input message: "Approval to Deploy to Production Env"
+      }
+   }
+   
+   stage("8. Deploy to Tomcat in Prod. Env"){
+       sh "echo start deploying to Tomcat server in Prod.Env"
+       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://54.146.145.34:9090')], contextPath: null, war: 'target/*.war'
+       sh "echo end of deploy to Tomcat server in Prod.Env"
+   }
+   
+   stage("9. Email Notification"){
+       sh " echo send successful deployment to tomcat email notification to DevOps Team"
+       emailext body: 'Successful deployment to Tomcat server in Prod Environment', subject: 'Successful Deployment', to: 'jaynaj79@gmail.com'
+   }
+
 }
-    
-} 
-    }
-    stage('7.Approval'){
-    timeout(time:5, unit:'DAYS'){
- 			input message: 'Approval for production'
-    
-    }
-    stage('8.deployToProd'){
-    sshagent(['32d5fb4f-d92f-4a10-9f12-2738eab55fcc']) {
-    sh "scp -o StrictHostKeyChecking=no target/*war ec2-user@172.31.15.31:/opt/tomcat9/webapps/"
-}
-    
-    }
-}
+
 
 
