@@ -1,6 +1,6 @@
 @Library('JomacsSharedLibrary') _
 pipeline{
-  agent any
+  agent { label "Node1" }
   tools{
     maven "maven3.8.8"
   }
