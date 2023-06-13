@@ -9,7 +9,7 @@ pipeline{
       stage("1. Git clone from repo"){
         steps{
          sh "echo start of git clone"
-         git branch: 'main', url: 'https://github.com/JOMACS-IT/web-app.git'
+         git branch: 'main', url: 'https://github.com/Jadebat79/web-app.git'
          sh "echo end of git clone"
         }
       }
