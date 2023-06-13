@@ -35,7 +35,7 @@ node(""){
    
    stage("6. Deploy to Tomcat in UAT"){
        sh "echo start deploying to Tomcat server in UAT"
-       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://34.207.243.183:9090')], contextPath: null, war: 'target/*.war'
+       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://54.173.160.87:9090')], contextPath: null, war: 'target/*.war'
        sh "echo end of deploy to Tomcat server in UAT"
    }
    
@@ -48,7 +48,7 @@ node(""){
    
    stage("8. Deploy to Tomcat in Prod. Env"){
        sh "echo start deploying to Tomcat server in Prod.Env"
-       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://54.146.145.34:9090')], contextPath: null, war: 'target/*.war'
+       deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-macstech', path: '', url: 'http://54.173.160.87:9090')], contextPath: null, war: 'target/*.war'
        sh "echo end of deploy to Tomcat server in Prod.Env"
    }
    
