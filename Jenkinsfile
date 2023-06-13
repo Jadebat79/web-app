@@ -39,7 +39,7 @@ pipeline{
       stage("5. Deploying to Tomcat in UAT"){
         steps{
            sh "echo start deploying to server in UAT Env"
-           deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-masctech', path: '', url: 'http://3.93.200.153:9090')], contextPath: null, war: 'target/*.war'
+           deploy adapters: [tomcat9(credentialsId: 'tomcat-cred-masctech', path: '', url: 'http://54.173.160.87:9090')], contextPath: null, war: 'target/*.war'
         }  
       }
       
